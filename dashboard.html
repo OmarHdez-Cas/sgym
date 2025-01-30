@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salamandra's GYM</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("filtro");
+            const tableBody = document.querySelector(".tabla-clientes tbody");
+            const menuToggle = document.querySelector(".menu-toggle");
+             const menu = document.querySelector(".menu");
+             const body = document.body;
+        
+            // Función para buscar clientes en la base de datos con AJAX
+            function buscarClientes(query) {
+                // Dentro de la función buscarClientes
+fetch(`/buscar_clientes?query=${query}`)
+    .then(response => response.json())
+    .then(data => {
+        tableBody.innerHTML = ""; // Limpiar la tabla
+
+        if (data.clientes.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='4'>No se encontraron clientes.</td></tr>";
+            return;
+        }
+
+        data.clientes.forEach(cliente => {
+            let estadoHtml = '';
+            if (cliente.estado === 'vencida') {
+                estadoHtml = '<span class="vencida">VENCIDA</span>';
+            } else if (cliente.estado.startsWith('proxima_vencer_')) {
+                const dias = cliente.estado.split('_')[2];
+                estadoHtml = `<span class="proxima-vencer">Vence en ${dias} días</span>`;
+            } else {
+                estadoHtml = cliente.vencimiento;
+            }
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${cliente.id}</td>
+                <td>${cliente.nombre}</td>
+                <td>${estadoHtml}</td>
+                <td>
+                    <div class="btns">
+                        <a href="/clientes/editar/${cliente.id}" class="btn btn-warning">Ver Detalles</a>
+                        <form action="/clientes/eliminar/${cliente.id}" method="POST">
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    })
+    .catch(error => console.error("Error en la búsqueda:", error));
+            }
+        
+            // Ordenar por ID más reciente
+            function ordenarPorRecientes() {
+                const rows = Array.from(tableBody.querySelectorAll("tr"));
+                rows.sort((a, b) => {
+                    const idA = parseInt(a.cells[0].textContent, 10);
+                    const idB = parseInt(b.cells[0].textContent, 10);
+                    return idB - idA;
+                });
+                rows.forEach(row => tableBody.appendChild(row));
+            }
+        
+            // Limitar la visualización a 5 filas
+            function limitarFilas() {
+                const rows = tableBody.querySelectorAll("tr");
+                rows.forEach((row, index) => {
+                    row.style.display = index < 5 ? "" : "none";
+                });
+            }
+        
+            // Evento cuando el usuario escribe en el buscador
+            input.addEventListener("input", function () {
+                const query = input.value.trim();
+                if (query.length > 0) {
+                    buscarClientes(query); // Busca en la BD
+                } else {
+                    location.reload(); // Si el input está vacío, recarga la página
+                }
+            });
+                    // Menú Responsive (Abrir/Cerrar)
+            menuToggle.addEventListener("click", function () {
+                menu.classList.toggle("active");
+            });
+        
+            // Ejecutar funciones al cargar la página
+            ordenarPorRecientes();
+            limitarFilas();
+        });
+        
+        // Cerrar sesión después de 3 minutos de inactividad
+        setTimeout(() => {
+            window.location.href = "{{ url_for('login') }}";
+        }, 180000);
+        </script>
+        
+    <style>
+        /* Reset y estilos base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Estructura general */
+body {
+    background: #23242a;
+    color: #fff;
+    line-height: 1.6;
+}
+
+/* Header */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background: #1a1a1a;
+    overflow: hidden;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid #228B22;
+}
+
+.header-box {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+}
+
+.header-box h1 {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+    z-index: 2;
+    letter-spacing: 0.1em;
+}
+
+.header-box h1 span {
+    color: #00cc22;
+}
+.vencida {
+    color: red;
+    font-weight: bold;
+}
+.proxima-vencer {
+    color: #ffa500;
+    font-weight: bold;
+}
+
+/* Menú en el Header */
+.menu {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.menu ul {
+    display: flex;
+    list-style: none;
+}
+
+.menu ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 0.9em;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease-in-out;
+    border: 2px solid transparent;
+}
+
+/* Efecto de brillo en el hover */
+.menu ul li a::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(157, 80, 255, 0.3), transparent 50%);
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out, top 0.3s ease-in-out, left 0.3s ease-in-out;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.menu ul li a:hover::before {
+    width: 150%;
+    height: 150%;
+    opacity: 1;
+}
+
+/* Borde animado en hover */
+.menu ul li a:hover {
+    color: #ffffff;
+    border-color: #bc13fe;
+    background: transparent;
+    box-shadow: 0 0 15px rgba(157, 80, 255, 0.3);
+}
+
+
+main {
+    padding: 100px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Info Section */
+.info {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.info h2 {
+    font-size: 1.8em;
+    color: #ffffff;
+}
+
+.info .textgym {
+    color: #00cc22;
+}
+
+.acciones {
+    margin-top: 15px;
+}
+
+.acciones .btn {
+    position: relative;
+  padding: 10px 20px;
+  border-radius: 7px;
+  text-decoration: none;
+  border: 1px solid rgb(0, 237, 51);
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 2px;
+  background: transparent;
+  color: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: all 0.2s ease-in;
+  -moz-transition: all 0.2s ease-in;
+  transition: all 0.2s ease-in;
+}
+
+.acciones .btn:hover {
+    background: rgb(0, 237, 51);
+  box-shadow: 0 0 30px 5px rgba(2, 183, 23, 0.815);
+  -webkit-transition: all 0.2s ease-out;
+  -moz-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
+}
+
+.acciones .btn:hover::before{
+    -webkit-animation: sh02 0.5s 0s linear;
+  -moz-animation: sh02 0.5s 0s linear;
+  animation: sh02 0.5s 0s linear;
+}
+
+.acciones .btn::before{
+    content: '';
+  display: block;
+  width: 0px;
+  height: 86%;
+  position: absolute;
+  top: 7%;
+  left: 0%;
+  opacity: 0;
+  background: #fff;
+  box-shadow: 0 0 50px 30px #fff;
+  -webkit-transform: skewX(-20deg);
+  -moz-transform: skewX(-20deg);
+  -ms-transform: skewX(-20deg);
+  -o-transform: skewX(-20deg);
+  transform: skewX(-20deg);
+}
+@keyframes sh02 {
+  from {
+    opacity: 0;
+    left: 0%;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    left: 100%;
+  }
+}
+
+.acciones .btn:active{
+    box-shadow: 0 0 0 0 transparent;
+  -webkit-transition: box-shadow 0.2s ease-in;
+  -moz-transition: box-shadow 0.2s ease-in;
+  transition: box-shadow 0.2s ease-in;
+}
+
+.busqueda input {
+    background: #1a1a1a;
+    color: #ffffff;
+    margin-top: 40px;
+    border-radius: 40px;
+    height: 40px;
+    text-align: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 20px;
+}
+
+/* Table */
+
+tbody {
+    background: #333333;
+}
+
+.tabla-clientes table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(157, 80, 255, 0.3);
+}
+
+.tabla-clientes th,
+.tabla-clientes td {
+    padding: 12px;
+    text-align: left;
+    border: 1px transparent;
+    border-bottom: 6px;
+}
+
+.tabla-clientes th {
+    background-color: #228B22 ;
+    color: #fff;
+    font-weight: bold;
+}
+
+
+
+.tabla-clientes .btn {
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 0.9em;
+    font-weight: bold;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) ;
+}
+
+.tabla-clientes .btn-warning {
+    background-color: #9d50ff;
+    color: white;
+    border: 2px solid transparent;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+}
+
+.tabla-clientes .btn-danger {
+    background-color: #f44336;
+    color: white;
+    border: 2px solid transparent;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tabla-clientes .btn:hover {
+    opacity: 0.8;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    
+}
+/* Efecto de fondo y transición */
+.tabla-clientes .btn-warning:hover {
+    background-color: #9d50ff; /* Color más oscuro al hacer hover */
+    border-color: #9d50ff;
+}
+
+.tabla-clientes .btn-danger:hover {
+    background-color: #d32f2f; /* Color más oscuro al hacer hover */
+    border-color: #d32f2f;
+}
+
+
+.tabla-clientes .box .btns{
+    display: flex;
+    justify-content: space-evenly;
+    padding: 2px;
+}
+
+/* Estilos para la paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    gap: 15px;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: #fff;
+    padding: 10px 20px;
+    background-color: #228B22;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: #00cc22;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 204, 34, 0.6);
+}
+
+.pagination span {
+    font-size: 16px;
+    color: #fff;
+    font-weight: bold;
+}
+
+.pagination a:disabled {
+    background-color: #aaa;
+    color: #666;
+    border-color: #aaa;
+    cursor: not-allowed;
+}
+
+.pagination a:disabled:hover {
+    background-color: #aaa;
+    color: #666;
+    transform: none;
+}
+
+/* Estilos base existentes... */
+
+/* Menú hamburguesa */
+.menu-toggle {
+    display: none;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: #fff;
+    margin: 5px 0;
+    transition: 0.3s;
+}
+
+@media screen and (max-width: 768px) {
+    .header-box h1 {
+        font-size: 1.4em;
+        margin-left: 10px;
+    }
+
+    /* Mostrar menú hamburguesa */
+    .menu-toggle {
+        display: block;
+    }
+
+    /* Menú responsive */
+    .menu {
+        position: fixed;
+        top: 50%;
+        right: -100%;
+        width: 250px;
+        height:  100%;
+        background: #1a1a1a;
+        padding: 80px 20px;
+        transition: right 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .menu.active {
+        right: 0;
+    }
+
+    .menu ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .menu ul li {
+        width: 100%;
+        text-align: center;
+    }
+
+    .menu ul li a {
+        display: block;
+        padding: 15px;
+        text-align: center;
+        border: 1px solid #718875;
+    }
+
+    .menu-toggle {
+        display: block;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        cursor: pointer;
+        z-index: 1001;
+    }
+
+    /* Main content ajustado */
+    main {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 80px auto 0; /* Deja espacio para el header */
+    }
+
+    /* Tabla responsive */
+    .tabla-clientes {
+        overflow-x: auto;
+    }
+
+    .tabla-clientes table {
+        width: 100%;
+    }
+
+    /* Ocultar columna de vencimiento en móviles */
+    .tabla-clientes th:nth-child(2),
+    .tabla-clientes td:nth-child(2) {
+        display: none;
+    }
+
+    /* Ajustar botones de acciones */
+    .tabla-clientes .box .btns {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .tabla-clientes .btn {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    /* Paginación responsive */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .pagination span {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .pagination a {
+        padding: 8px 15px;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    /* Input de búsqueda */
+    .busqueda input {
+        width: 90%;
+        margin: 20px auto;
+        font-size: 16px;
+    }
+}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="header-box">
+            <h1>Salamandra's <span class="txtgym">GYM</span></h1>
+            <nav id="nav" class="menu">
+                <ul>
+                    <li><a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
+                    
+                    <li><a href="{{ url_for('cambiar_usuario_contraseña') }}" class="btn">Cambiar Datos</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+        <!-- Contenido Principal -->
+        <main>
+            <section class="info">
+                <h2>Gestión de <span class="textgym">Clientes</span></h2>
+                <div class="acciones">
+                    <a href="{{ url_for('agregar_cliente') }}" class="btn">Agregar Nuevo Cliente</a>
+                </div>
+
+                <div class="busqueda">
+                    <form method="GET" action="{{ url_for('listar_clientes') }}">
+                        <input type="text" name="busqueda" id="filtro" placeholder="Buscar cliente..." value="{{ busqueda }}" style="margin-bottom: 10px; padding: 5px; width: 100%;">
+
+                    </form>
+                </div>
+                
+            </section>
+    
+            <section class="tabla-clientes">
+                <table class="box">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Vencimiento</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cliente in clientes %}
+                            <tr>
+                                <td>{{ cliente[0] }}</td>
+                                <td>{{ cliente[1] }}</td>
+                                <td>
+                                    {% if cliente[5] < fecha_actual %}
+                                        <span class="vencida">VENCIDA</span>
+                                    {% elif fecha_actual <= cliente[5] <= fecha_limite_aviso %}
+                                        <span class="proxima-vencer">Vence en: {{ (cliente[5] - fecha_actual).days }} días</span>
+                                    {% else %}
+                                        {{ cliente[5].strftime('%Y-%m-%d') }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btns">
+                                        <a href="{{ url_for('editar_cliente', id=cliente[0]) }}" class="btn btn-warning">Ver Detalles</a>
+                                        <form action="{{ url_for('eliminar_cliente', id=cliente[0]) }}" method="POST" >
+                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5">No hay clientes registrados.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    {% if page > 1 %}
+                        <a href="{{ url_for('listar_clientes', page=page-1) }}">Anterior</a>
+                    {% endif %}
+                    <span>Página {{ page }} de {{ total_paginas }}</span>
+                    {% if page < total_paginas %}
+                        <a href="{{ url_for('listar_clientes', page=page+1) }}">Siguiente</a>
+                    {% endif %}
+                </div>      
+            </section>
+        </main>
+</body>
+</html>

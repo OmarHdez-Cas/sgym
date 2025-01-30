@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Membresia</title>
+    <style>
+        *
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+    
+        body 
+        {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #23242a;
+        }
+.box, .form-container {
+  width: 30%;
+  background: linear-gradient(#212121, #212121) padding-box,
+              linear-gradient(145deg, transparent 35%,#e81cff, #40c9ff) border-box;
+  border: 2px solid transparent;
+  padding: 32px 24px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background-size: 200% 100%;
+  animation: gradient 5s ease infinite;
+}
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.form-container button:active, .box button:active {
+  scale: 0.95;
+}
+.form-container .form, .box form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.form-container .form-group, .box .inputBox {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.form-container .form-group label, .box .inputBox label {
+  display: block;
+  margin-bottom: 5px;
+  color: #717171;
+  font-weight: 600;
+  font-size: 14px;
+}
+.form-container .form-group input,
+.form-container .form-group textarea,
+.box .inputBox input,
+.box .inputBox textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #fff;
+  font-family: inherit;
+  background-color: transparent;
+  border: 1px solid #414141;
+}
+.form-container .form-group textarea, .box .inputBox textarea {
+  resize: none;
+  height: 96px;
+}
+.form-container .form-group input::placeholder, .box .inputBox input::placeholder {
+  opacity: 0.5;
+}
+.form-container .form-group input:focus,
+.form-container .form-group textarea:focus,
+.box .inputBox input:focus,
+.box .inputBox textarea:focus {
+  outline: none;
+  border-color: #e81cff;
+}
+/* Mantener el estilo de select y date */
+.box .inputBox select {
+  width: 100%;
+  padding: 10px 20px;
+  background: #1c1c1c;
+  color: #fff;
+  border: none;
+  outline: none;
+  border-radius: 4px;
+  font-size: 1em;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #fff 50%),
+                    linear-gradient(135deg, #fff 50%, transparent 50%);
+  background-position: calc(100% - 20px) calc(50% - 2px),
+                      calc(100% - 15px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.box .inputBox select option {
+  background: #1c1c1c;
+  color: #fff;
+  padding: 10px;
+  border: none;
+}
+.box .inputBox select option:hover {
+  background: #444;
+}
+.box .inputBox input[type="date"] {
+  width: 100%;
+  padding: 10px 15px;
+  background: #1c1c1c;
+  color: #f1eefd;
+  border: 2px solid #444;
+  border-radius: 4px;
+  outline: none;
+  font-size: 1em;
+  font-weight: 500;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+.box .btns {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.form-container .form-submit-btn, .box .btns input[type="submit"], .box .btns a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  color: #717171;
+  font-weight: 600;
+  width: 48%;
+  background: #313131;
+  border: 1px solid #414141;
+  padding: 12px 16px;
+  font-size: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+  text-decoration: none;
+  text-align: center;
+}
+.form-container .form-submit-btn:hover, .box .btns input[type="submit"]:hover, .box .btns a:hover {
+  background-color: #fff;
+  border-color: #fff;
+  color: #000;
+}
+.flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.alert {
+    position: relative;
+    padding: 15px 40px 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    animation: slideIn 0.5s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background: linear-gradient(145deg, #28a745, #218838);
+    color: white;
+    border-left: 4px solid #1e7e34;
+}
+
+.alert-error, .alert-danger {
+    background: linear-gradient(145deg, #dc3545, #c82333);
+    color: white;
+    border-left: 4px solid #bd2130;
+}
+
+.alert-warning {
+    background: linear-gradient(145deg, #ffc107, #e0a800);
+    color: #000;
+    border-left: 4px solid #d39e00;
+}
+
+.close-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1.2em;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+/* Modificaciones responsive */
+.box {
+    width: 90%; /* Cambiado de 30% */
+    max-width: 400px; /* Límite para pantallas grandes */
+    margin: 20px;
+}
+
+/* Ajustes para móviles */
+@media (max-width: 768px) {
+    .box {
+        padding: 24px 16px;
+    }
+
+    .inputBox select, 
+    .inputBox input[type="date"] {
+        font-size: 0.9em;
+        padding: 8px 12px;
+    }
+
+    .btns {
+        flex-direction: row;
+    }
+
+    .btns input[type="submit"], 
+    .btns a {
+        width: 100%;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .box {
+        width: 95%;
+    }
+    
+    .cliente span {
+        font-size: 0.9em;
+    }
+}
+
+    </style>
+
+    
+</head>
+<body>
+    <div class="box">
+        <form method="POST">
+            <div class="cliente">
+                <span> Cliente: </span> {{ cliente['nombre'] }}
+                <i></i>
+            </div>
+            <div class="inputBox">
+                
+                <label for="tipo_membresia">Tipo de Membresia</label>     
+                <div class="casilla">     
+                    <select name="tipo_membresia" id="tipo_membresia">
+                        <option value="mensual">Mensual</option>
+                        <option value="trimestral">Trimestral</option>
+                        <option value="semestral">Semestral</option>
+                        <option value="anual">Anual</option>
+                    </select>
+                </div>
+            </div>
+            <div class="inputBox">
+                <label for="fecha_inicio">Fecha de Renovacion</label>
+                <div class="a">
+                    <input type="date"  id="fecha_inicio" name="fecha_inicio" required>
+                </div>
+            </div>
+            <div class="btns">
+                <input type="submit" value="Actualizar">
+                <a href="{{ url_for('editar_cliente', id=cliente['id_cliente']) }}">Regresar</a>
+            </div>
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                                <span class="close-btn">&times;</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+        </form>
+    </div>  
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Añadir event listeners para los botones de cerrar
+            document.querySelectorAll('.close-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const alert = this.parentElement;
+                    alert.style.animation = 'fadeOut 0.5s ease-in-out forwards';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 500);
+                });
+            });
+        
+            // Auto-ocultar mensajes después de 5 segundos
+            document.querySelectorAll('.alert').forEach(alert => {
+                setTimeout(() => {
+                    if (alert) {
+                        alert.style.animation = 'fadeOut 0.5s ease-in-out forwards';
+                        setTimeout(() => {
+                            alert.remove();
+                        }, 500);
+                    }
+                }, 5000);
+            });
+        });
+        </script>  
+</body>
+</html>

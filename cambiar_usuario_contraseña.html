@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: #23242a;
+    }
+
+    .login-box {
+        position: relative;
+        width: 90%;
+        max-width: 400px;
+        padding: 40px;
+        background: rgba(24, 20, 20, 0.987);
+        box-sizing: border-box;
+        box-shadow: 0 15px 25px rgba(0,0,0,.6);
+        border-radius: 10px;
+    }
+
+    .login-box .user-box {
+        position: relative;
+    }
+
+    .login-box .user-box input {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 16px;
+        color: #fff;
+        margin-bottom: 30px;
+        border: none;
+        border-bottom: 1px solid #fff;
+        outline: none;
+        background: transparent;
+    }
+
+    .login-box .user-box label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 10px 0;
+        font-size: 16px;
+        color: #fff;
+        pointer-events: none;
+        transition: .5s;
+    }
+
+    .login-box .user-box input:focus ~ label,
+    .login-box .user-box input:valid ~ label {
+        top: -20px;
+        left: 0;
+        color: #bdb8b8;
+        font-size: 12px;
+    }
+
+    .btns {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        gap: 10px; /* Espacio entre botones */
+    }
+
+    .login-box input[type="submit"],
+    .login-box .btns a {
+        flex: 1; /* Hace que ambos botones tengan el mismo tamaño */
+        border: none;
+        outline: none;
+        padding: 10px;
+        background: #03f40f;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        transition: .5s;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .login-box input[type="submit"]:hover,
+    .login-box .btns a:hover {
+        background: #03f40f;
+        box-shadow: 0 0 5px #03f40f,
+                    0 0 25px #03f40f,
+                    0 0 50px #03f40f,
+                    0 0 100px #03f40f;
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 480px) {
+        .login-box {
+            padding: 20px;
+        }
+
+        .login-box .user-box input {
+            font-size: 14px;
+        }
+
+        .login-box .user-box label {
+            font-size: 14px;
+        }
+
+        .login-box input[type="submit"],
+        .login-box .btns a {
+            font-size: 14px;
+            padding: 8px;
+            letter-spacing: 1px;
+        }
+    }
+    .flash-messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.alert {
+    position: relative;
+    padding: 15px 40px 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    animation: slideIn 0.5s ease-in-out;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background: linear-gradient(145deg, #28a745, #218838);
+    color: white;
+    border-left: 4px solid #1e7e34;
+}
+
+.alert-error, .alert-danger {
+    background: linear-gradient(145deg, #dc3545, #c82333);
+    color: white;
+    border-left: 4px solid #bd2130;
+}
+
+.alert-warning {
+    background: linear-gradient(145deg, #ffc107, #e0a800);
+    color: #000;
+    border-left: 4px solid #d39e00;
+}
+
+.close-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1.2em;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+  </style>
+</head>
+<body>
+
+  <div class="flash-messages">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                    <span class="close-btn">&times;</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+  <div class="login-box">
+    <form method="POST">
+      <div class="user-box">
+        <input type="text" name="nuevo_usuario" id="nuevo_usuario" required>
+        <label>Nuevo Usuario</label>
+      </div>
+      <div class="user-box">
+        <input type="password" name="nueva_contraseña" id="nueva_contraseña" required>
+        <label>Nueva Contraseña</label>
+      </div>
+      <div class="user-box">
+        <input type="password" name="confirmar_contraseña" id="confirmar_contraseña" required>
+        <label>Confirmar Contraseña</label>
+      </div>
+      <div class="btns">
+        <input type="submit" value="Aceptar">
+        <a href="{{ url_for('listar_clientes') }}">Regresar</a>
+      </div>
+    </form>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Añadir event listeners para los botones de cerrar
+        document.querySelectorAll('.close-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const alert = this.parentElement;
+                alert.style.animation = 'fadeOut 0.5s ease-in-out forwards';
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
+            });
+        });
+    
+        // Auto-ocultar mensajes después de 5 segundos
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                if (alert) {
+                    alert.style.animation = 'fadeOut 0.5s ease-in-out forwards';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 500);
+                }
+            }, 5000);
+        });
+    });
+    </script>
+</body>
+</html>
